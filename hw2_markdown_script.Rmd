@@ -1,0 +1,80 @@
+---
+title: "Data Science HW2"
+author: "Jeff Goldsmith"
+date: '`r format(Sys.time(), "%Y-%m-%d")`'
+output: github_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, message = FALSE)
+```
+
+
+```{r load_libraries}
+library(tidyverse)
+library(readxl)
+```
+### Problem 2
+Load Mr Trash Dataset and Clean Data
+
+```{r}
+
+mr_trash_data <- read_excel("data/Trash_Wheel_Collection_Data_updated.xlsx",sheet=1, skip = 1, range = cell_cols("A:N")) %>% 
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>% #omit columns with no dumpster specific data
+  mutate(year = as.numeric(year)) %>%
+  mutate(sports_balls = as.integer(sports_balls)) %>% 
+  mutate(wheel_type = "mister" ) %>%
+  select(dumpster, wheel_type, month:chip_bags,homes_powered, sports_balls)
+
+
+```
+Load Professor Trash Data and Clean Data 
+
+```{r}
+prof_trash_data <- read_excel("data/Trash_Wheel_Collection_Data_updated.xlsx",sheet=2, skip = 1, range = cell_cols("A:M")) %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>% 
+  mutate(wheel_type = "prof") %>%
+  select(dumpster, wheel_type, month:homes_powered) %>%
+  mutate(sports_balls = 0)
+  
+ 
+```
+Combining the two datasets (mister + prof)
+
+```{r}
+
+trash_data <- bind_rows(mr_trash_data, prof_trash_data)
+
+obs <- trash_data %>%
+  nrow()
+
+tot_weight <- trash_data %>%
+  pull(weight_tons) %>%
+  sum()
+
+prof_tot_weight <- prof_trash_data %>%
+  pull(weight_tons) %>%
+    sum()
+
+mr_sports_2020 <- mr_trash_data %>%
+  filter(year == 2020) %>%
+  pull(sports_balls) %>%
+  sum()
+  
+```
+There are `r obs` observations in the combined dataset, which includes both mr and professor trash wheel. There is no information about sports balls for Professor trash wheel. Key variables include total weight of trash collected in tonnes (weight_tons), volume of trash collected (cubic yards), and the number of plastic bottles collected (plastic_bottles). The total weight of trash collected by both wheels is `r tot_weight`
+
+The total weight of trash collected by professor trash wheel was `r prof_tot_weight`. 
+`r mr_sports_2020` sports balls were collected by Mr Trash wheel in 2020.
+
+
+###Problem 3 
+
+```{r}
+
+
+```
+
